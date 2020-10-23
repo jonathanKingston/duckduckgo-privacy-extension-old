@@ -77,3 +77,58 @@ describe('Fingerprint Defense Tests', () => {
         })
     })
 })
+
+describe('First Party Fingerprint Randomization', () => {
+    beforeAll(async () => {
+        ({ browser, bgPage } = await harness.setup())
+
+        // wait for HTTPs to successfully load
+        await bgPage.waitForFunction(
+            () => window.dbg && dbg.https.isReady,
+            { polling: 100, timeout: 60000 }
+        )
+    })
+    afterAll(async () => {
+        await harness.teardown(browser)
+    })
+
+    it('Fingerprints should not match across first parties', async () => {
+        let canvasResults = new Set()
+        let pluginResults = new Set()
+        for (let test of tests) {
+            const page = await browser.newPage()
+
+            try {
+                await page.goto(`http://${test.url}`, { waitUntil: 'networkidle0' })
+            } catch (e) {
+                // timed out waiting for page to load, let's try running the test anyway
+            }
+            // give it another second just to be sure
+            await page.waitFor(1000)
+
+            await page.addScriptTag({path: 'node_modules/@fingerprintjs/fingerprintjs/dist/fp.js'})
+
+            const fingerprint = await page.evaluate(() => {
+                /* global FingerprintJS */
+                return (async () => {
+                    let fp = await FingerprintJS.load()
+                    return fp.get()
+                })()
+            })
+
+            // Add the fingerprints to a set, if the result doesn't match it won't be added
+            canvasResults.add(fingerprint.components.canvas.value.data)
+            pluginResults.add(fingerprint.components.plugins.value.data)
+
+            // TODO load the first party twice and verify that we don't generate multiple fingerprints
+
+            // TODO load an third party iframe and verify that the signatures match the first party
+
+            await page.close()
+        }
+
+        // Ensure that the number of test pages match the number in the set
+        expect(canvasResults.size).toEqual(tests.length)
+        expect(pluginResults.size).toEqual(tests.length)
+    })
+})
