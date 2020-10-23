@@ -203,6 +203,73 @@
         }
     }
 
+    function buildCanvasScript () {
+        function toString(methodName) {
+            return `function ${methodName}() {
+                [native code]
+            }`;
+        }
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * min + (max - min));
+        }
+
+        // TODO lookup storage, if not generate.
+        let colorStops = [];
+        let gradients = '';
+        for (let i = 0; i < getRandomInt(2, 5); i++) {
+             // 0.001 isn't rendered anything above 0.005 can become visible
+             let cs = {
+               r: getRandomInt(0, 255),
+               g: getRandomInt(0, 255),
+               b: getRandomInt(0, 255),
+               a: getRandomInt(1, 5) * 0.001,
+             };
+             gradients += `gradient.addColorStop(${i*0.1}, 'rgba(${cs.r},${cs.g},${cs.b},${cs.a})');`;
+             colorStops.push(cs);
+        }
+        
+        return `
+        (() => {
+          let _toDataURL = HTMLCanvasElement.prototype.toDataURL;
+          function toDataURL() {
+            let ctx = this.getContext('2d');
+            let imageData = ctx.getImageData(0, 0, this.width, this.height);
+        
+            // Make a off-screen canvas and put the data there
+            let offScreenCanvas = document.createElement('canvas');
+            offScreenCanvas.width = this.width;
+            offScreenCanvas.height = this.height;
+            let offScreenCtx = offScreenCanvas.getContext('2d');
+            offScreenCtx.putImageData(imageData, 0, 0);
+
+            // TODO render random size
+            let gradient = offScreenCtx.createRadialGradient(10,20,30, 100,100,70);
+
+            // Add color stops
+            ${gradients}
+            offScreenCtx.fillStyle = gradient;
+            offScreenCtx.fillRect(0, 0, this.height, this.width);
+            document.body.appendChild(offScreenCanvas);
+
+            // TODO Now these values have been used, store them
+            // TODO there may be a race condition of an attacker loading multiple iframes...
+
+            // Call the original method on the modified off-screen canvas
+            return _toDataURL.apply(offScreenCanvas, arguments);
+          };
+          toDataURL.toString = () => {
+              return \`${toString('toDataURL')}\`;
+          };
+          Object.defineProperty(HTMLCanvasElement.prototype, 'toDataURL', {
+              value: toDataURL,
+              configurable: true,
+              writeable: false
+          });
+        })();
+        `;
+    }
+
     /**
      * All the steps for building the injection script. Should only be done at initial page load.
      */
@@ -210,6 +277,7 @@
         let script = buildScriptProperties()
         script += buildBatteryScript()
         script += setWindowDimensions()
+        script += buildCanvasScript()
         return script
     }
 
