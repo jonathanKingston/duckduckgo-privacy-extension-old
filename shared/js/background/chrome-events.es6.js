@@ -206,6 +206,7 @@ chrome.runtime.onMessage.addListener((req, sender, res) => {
  */
 const agents = require('./storage/agents.es6')
 const agentSpoofer = require('./classes/agentspoofer.es6')
+const fingerprintService = require('./fingerprint-service.es6')
 
 // Inject fingerprint protection into sites when
 // they are not whitelisted.
@@ -225,6 +226,7 @@ chrome.webNavigation.onCommitted.addListener(details => {
                 'code': `
                     try {
                         var ddg_ext_ua='${agentSpoofer.getAgent()}'
+                        var ddg_ext_fingerprint=${JSON.stringify(fingerprintService.getFingerprint(tabURL.hostname))}
                     } catch(e) {}`,
                 'runAt': 'document_start',
                 'allFrames': true,
@@ -311,6 +313,8 @@ chrome.alarms.create('updateHTTPSLists', { periodInMinutes: 12 * 60 })
 chrome.alarms.create('updateLists', { periodInMinutes: 30 })
 // update uninstall URL every 10 minutes
 chrome.alarms.create('updateUninstallURL', { periodInMinutes: 10 })
+// remove expired fingerprint service entries
+chrome.alarms.create('clearExpiredFingerprintServiceCache', { periodInMinutes: 60 })
 // remove expired HTTPS service entries
 chrome.alarms.create('clearExpiredHTTPSServiceCache', { periodInMinutes: 60 })
 // Update userAgent lists
@@ -335,6 +339,8 @@ chrome.alarms.onAlarm.addListener(alarmEvent => {
         tdsStorage.getLists()
             .then(lists => trackers.setLists(lists))
             .catch(e => console.log(e))
+    } else if (alarmEvent.name === 'clearExpiredFingerprintServiceCache') {
+        httpsService.clearExpiredCache()
     } else if (alarmEvent.name === 'clearExpiredHTTPSServiceCache') {
         httpsService.clearExpiredCache()
     } else if (alarmEvent.name === 'updateUserAgentData') {
