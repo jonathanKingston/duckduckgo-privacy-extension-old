@@ -22,7 +22,7 @@ const expectedFingerprintValues = {
 
 const tests = [
     {url: 'wikipedia.com'},
-    {url: 'reddit.com'}
+    {url: 'example.com'}
 ]
 
 function testFPValues (values) {
@@ -85,50 +85,70 @@ describe('First Party Fingerprint Randomization', () => {
         // wait for HTTPs to successfully load
         await bgPage.waitForFunction(
             () => window.dbg && dbg.https.isReady,
-            { polling: 100, timeout: 60000 }
+            { polling: 100, timeout: 6000 }
         )
     })
     afterAll(async () => {
         await harness.teardown(browser)
     })
 
+    async function runTest(test) {
+        const page = await browser.newPage()
+
+        try {
+            await page.goto(`http://${test.url}`, { waitUntil: 'networkidle0' })
+        } catch (e) {
+            // timed out waiting for page to load, let's try running the test anyway
+        }
+
+        // give it another second just to be sure
+        await page.waitFor(1000)
+
+        await page.addScriptTag({path: 'node_modules/@fingerprintjs/fingerprintjs/dist/fp.js'})
+
+        const fingerprint = await page.evaluate(() => {
+            /* global FingerprintJS */
+            return (async () => {
+                let fp = await FingerprintJS.load()
+                return fp.get()
+            })()
+        })
+
+        // TODO load the first party twice and verify that we don't generate multiple fingerprints
+
+        // TODO load an third party iframe and verify that the signatures match the first party
+
+        await page.close()
+        return {
+            canvas: fingerprint.components.canvas.value.data,
+            plugin: fingerprint.components.plugins.value.data
+        };
+    }
+
+    for (let testCase of tests) {
+        it('Fingerprints should not change amongst page loads', async () => {
+            let result = await runTest(testCase);
+
+            let result2 = await runTest(testCase);
+            expect(Object.assign({testCase}, result.canvas)).toEqual(Object.assign({testCase},result2.canvas));
+            expect(result.plugin).toEqual(result2.plugin);
+        })
+    }
+
     it('Fingerprints should not match across first parties', async () => {
-        let canvasResults = new Set()
-        let pluginResults = new Set()
-        for (let test of tests) {
-            const page = await browser.newPage()
+        let canvas = new Set();
+        let plugin = new Set();
 
-            try {
-                await page.goto(`http://${test.url}`, { waitUntil: 'networkidle0' })
-            } catch (e) {
-                // timed out waiting for page to load, let's try running the test anyway
-            }
-            // give it another second just to be sure
-            await page.waitFor(1000)
-
-            await page.addScriptTag({path: 'node_modules/@fingerprintjs/fingerprintjs/dist/fp.js'})
-
-            const fingerprint = await page.evaluate(() => {
-                /* global FingerprintJS */
-                return (async () => {
-                    let fp = await FingerprintJS.load()
-                    return fp.get()
-                })()
-            })
+        for (let testCase of tests) {
+            let result = await runTest(testCase);
 
             // Add the fingerprints to a set, if the result doesn't match it won't be added
-            canvasResults.add(fingerprint.components.canvas.value.data)
-            pluginResults.add(fingerprint.components.plugins.value.data)
-
-            // TODO load the first party twice and verify that we don't generate multiple fingerprints
-
-            // TODO load an third party iframe and verify that the signatures match the first party
-
-            await page.close()
+            canvas.add(result.canvas);
+            plugin.add(result.plugin);
         }
 
         // Ensure that the number of test pages match the number in the set
-        expect(canvasResults.size).toEqual(tests.length)
-        expect(pluginResults.size).toEqual(tests.length)
+        expect(canvas.size).toEqual(tests.length)
+        expect(plugin.size).toEqual(tests.length)
     })
 })

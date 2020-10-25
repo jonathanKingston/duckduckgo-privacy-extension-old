@@ -70,7 +70,7 @@ class FingerprintService {
     getFingerprint (host) {
         const cache = this.checkInCache(host);
         if (cache) {
-          return cache;
+            return cache;
         }
         const data = this.generateNewFingerprint();
         this._cacheResult(host, data);
