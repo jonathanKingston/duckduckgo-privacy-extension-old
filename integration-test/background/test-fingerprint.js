@@ -92,7 +92,7 @@ describe('First Party Fingerprint Randomization', () => {
         await harness.teardown(browser)
     })
 
-    async function runTest(test) {
+    async function runTest (test) {
         const page = await browser.newPage()
 
         try {
@@ -122,29 +122,29 @@ describe('First Party Fingerprint Randomization', () => {
         return {
             canvas: fingerprint.components.canvas.value.data,
             plugin: fingerprint.components.plugins.value.data
-        };
+        }
     }
 
     for (let testCase of tests) {
         it('Fingerprints should not change amongst page loads', async () => {
-            let result = await runTest(testCase);
+            let result = await runTest(testCase)
 
-            let result2 = await runTest(testCase);
-            expect(Object.assign({testCase}, result.canvas)).toEqual(Object.assign({testCase},result2.canvas));
-            expect(result.plugin).toEqual(result2.plugin);
+            let result2 = await runTest(testCase)
+            expect(Object.assign({testCase}, result.canvas)).toEqual(Object.assign({testCase}, result2.canvas))
+            expect(result.plugin).toEqual(result2.plugin)
         })
     }
 
     it('Fingerprints should not match across first parties', async () => {
-        let canvas = new Set();
-        let plugin = new Set();
+        let canvas = new Set()
+        let plugin = new Set()
 
         for (let testCase of tests) {
-            let result = await runTest(testCase);
+            let result = await runTest(testCase)
 
             // Add the fingerprints to a set, if the result doesn't match it won't be added
-            canvas.add(result.canvas);
-            plugin.add(result.plugin);
+            canvas.add(result.canvas)
+            plugin.add(result.plugin)
         }
 
         // Ensure that the number of test pages match the number in the set

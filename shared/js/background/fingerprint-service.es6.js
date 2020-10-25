@@ -1,7 +1,6 @@
 const sha1 = require('../shared-utils/sha1')
 // eslint-disable-next-line node/no-deprecated-api
 const punycode = require('punycode')
-const constants = require('../../data/constants')
 const ONE_HOUR_MS = 60 * 60 * 1000
 
 class FingerprintService {
@@ -40,26 +39,26 @@ class FingerprintService {
     }
 
     getRandomInt (min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
+        min = Math.ceil(min)
+        max = Math.floor(max)
         // TODO use Cryto instead
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+        return Math.floor(Math.random() * (max - min + 1)) + min
     }
 
     generateNewFingerprint () {
-        let colorStops = [];
+        let colorStops = []
         for (let i = 0; i < this.getRandomInt(2, 5); i++) {
-             // 0.001 isn't rendered anything above 0.005 can become visible
-             let cs = {
-               r: this.getRandomInt(0, 255),
-               g: this.getRandomInt(0, 255),
-               b: this.getRandomInt(0, 255),
-               a: this.getRandomInt(1, 5) * 0.001,
-             };
-             colorStops.push(cs);
+            // 0.001 isn't rendered anything above 0.005 can become visible
+            let cs = {
+                r: this.getRandomInt(0, 255),
+                g: this.getRandomInt(0, 255),
+                b: this.getRandomInt(0, 255),
+                a: this.getRandomInt(1, 5) * 0.001
+            }
+            colorStops.push(cs)
         }
         return {
-            "canvas": {cs: colorStops}
+            'canvas': {cs: colorStops}
         }
     }
 
@@ -68,14 +67,14 @@ class FingerprintService {
      * @returns {Object}
      */
     getFingerprint (host) {
-        const cache = this.checkInCache(host);
+        const cache = this.checkInCache(host)
         if (cache) {
-            return cache;
+            return cache
         }
-        const data = this.generateNewFingerprint();
-        this._cacheResult(host, data);
+        const data = this.generateNewFingerprint()
+        this._cacheResult(host, data)
         // TODO store data
-        return data;
+        return data
     }
 
     clearCache () {

@@ -86,11 +86,11 @@
             }
         },
         'useragent': {
-//            'userAgent': {
-//                'object': 'navigator',
-//                'origValue': navigator.userAgent,
-//                'targetValue': `"${ddg_ext_ua}"` // Defined in chrome-events.es6.js and injected as a variable
-//            },
+            //            'userAgent': {
+            //                'object': 'navigator',
+            //                'origValue': navigator.userAgent,
+            //                'targetValue': `"${ddg_ext_ua}"` // Defined in chrome-events.es6.js and injected as a variable
+            //            },
             'appVersion': {
                 'object': 'navigator',
                 'origValue': navigator.appVersion,
@@ -107,7 +107,7 @@
     }
 
     /**
-     * the navigator.appVersion is sometimes used to 'validate' the user agent. In Firefox, this 
+     * the navigator.appVersion is sometimes used to 'validate' the user agent. In Firefox, this
      * returns a truncated version of the user Agent with just the OS type (X11, Macintosh, etc). Chrome
      * returns the full user Agent.
      *
@@ -204,12 +204,12 @@
     }
 
     function buildCanvasScript () {
-        function toString(methodName) {
+        function toString (methodName) {
             return `function ${methodName}() {
                 [native code]
-            }`;
+            }`
         }
-        
+
         return `
         (() => {
           let _toDataURL = HTMLCanvasElement.prototype.toDataURL;
@@ -254,7 +254,7 @@
               writeable: false
           });
         })();
-        `;
+        `
     }
 
     /**
