@@ -45,6 +45,11 @@ class FingerprintService {
         return Math.floor(Math.random() * (max - min + 1)) + min
     }
 
+    getRandomHash () {
+        // TODO use Cryto instead
+        return sha1(Math.random())
+    }
+
     generateNewFingerprint () {
         let colorStops = []
         for (let i = 0; i < this.getRandomInt(2, 5); i++) {
@@ -57,8 +62,39 @@ class FingerprintService {
             }
             colorStops.push(cs)
         }
+
+        let plugins = navigator.plugins
+        let pluginsOut = []
+        for (let plugin of plugins) {
+            let mimeTypes = []
+            for (let mimeType of plugin) {
+                mimeTypes.push({
+                    type: mimeType.type,
+                    description: this.getRandomHash(),
+                    suffixes: mimeType.suffixes
+                })
+            }
+            let name = plugin.name
+            let description = plugin.description
+            // Support for PDF is still needed
+            if (!name.match('PDF')) {
+                name = this.getRandomHash().substr(0, this.getRandomInt(5, 10))
+                description = this.getRandomHash()
+            }
+            let obj = {
+                name,
+                filename: this.getRandomHash(),
+                version: plugin.version,
+                description,
+                mimeTypes
+            }
+            pluginsOut.push(obj)
+        }
+        // TODO shuffle plugin array
+
         return {
-            'canvas': {cs: colorStops}
+            canvas: {cs: colorStops},
+            plugins: pluginsOut
         }
     }
 

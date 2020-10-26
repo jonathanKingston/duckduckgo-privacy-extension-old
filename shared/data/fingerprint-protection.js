@@ -22,6 +22,12 @@
         // if we can't find content type, go ahead with injection.
     }
 
+    function toString (methodName) {
+        return `function ${methodName}() {
+            [native code]
+        }`
+    }
+
     // Property values to be set and their original values.
     const fingerprintPropertyValues = {
         'screen': {
@@ -204,12 +210,6 @@
     }
 
     function buildCanvasScript () {
-        function toString (methodName) {
-            return `function ${methodName}() {
-                [native code]
-            }`
-        }
-
         return `
         (() => {
           let _toDataURL = HTMLCanvasElement.prototype.toDataURL;
@@ -257,6 +257,41 @@
         `
     }
 
+    function buildPluginProperties () {
+        // TODO support all the API methods
+        return `
+        (() => {
+          class Plugin {
+              constructor(data) {
+                  for (let i in data.mimeTypes) {
+                    this[i] = data.mimeTypes[i];
+                  }
+                  this.length = data.mimeTypes.length;
+                  this.description = data.description;
+                  this.filename = data.filename;
+                  this.name = data.name;
+              }
+          }
+          class PluginArray {
+              constructor() {
+                  this.orig = navigator.plugins;
+                  let data = ${JSON.stringify(ddg_ext_fingerprint.plugins)};
+                  this.length = data.length;
+                  for (let i in data) {
+                      this[i] = new Plugin(data[i]);
+                  }
+              }
+          }
+          //window.plugg = new PluginArray();
+          Object.defineProperty(navigator, 'plugins', {
+              value: new PluginArray(),
+              configurable: true,
+              writeable: false
+          });
+        })();
+        `
+    }
+
     /**
      * All the steps for building the injection script. Should only be done at initial page load.
      */
@@ -265,6 +300,7 @@
         script += buildBatteryScript()
         script += setWindowDimensions()
         script += buildCanvasScript()
+        script += buildPluginProperties()
         return script
     }
 
