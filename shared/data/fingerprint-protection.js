@@ -271,6 +271,19 @@
                   this.filename = data.filename;
                   this.name = data.name;
               }
+
+              [Symbol.iterator]() {
+                return {
+                  plugin: this,
+                  i: 0,
+                  next() {
+                    if (this.i < this.plugin.length) {
+                      return { value: this.plugin[this.i++], done: false };
+                    }
+                    return { value: undefined, done: true };
+                  }
+                };
+              }
           }
           class PluginArray {
               constructor() {
@@ -282,7 +295,6 @@
                   }
               }
           }
-          //window.plugg = new PluginArray();
           Object.defineProperty(navigator, 'plugins', {
               value: new PluginArray(),
               configurable: true,

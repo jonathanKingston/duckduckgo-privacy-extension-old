@@ -114,14 +114,13 @@ describe('First Party Fingerprint Randomization', () => {
             })()
         })
 
-        // TODO load the first party twice and verify that we don't generate multiple fingerprints
-
         // TODO load an third party iframe and verify that the signatures match the first party
 
         await page.close()
+
         return {
-            canvas: fingerprint.components.canvas.value.data,
-            plugin: fingerprint.components.plugins.value.data
+            canvas: fingerprint.components.canvas.value,
+            plugin: fingerprint.components.plugins.value
         }
     }
 
@@ -130,7 +129,7 @@ describe('First Party Fingerprint Randomization', () => {
             let result = await runTest(testCase)
 
             let result2 = await runTest(testCase)
-            expect(Object.assign({testCase}, result.canvas)).toEqual(Object.assign({testCase}, result2.canvas))
+            expect(result.canvas).toEqual(result2.canvas)
             expect(result.plugin).toEqual(result2.plugin)
         })
     }
