@@ -224,8 +224,17 @@
             offScreenCtx.putImageData(imageData, 0, 0);
 
             let canvasValue = ${JSON.stringify(ddg_ext_fingerprint.canvas)};
-            // TODO render random size
-            let gradient = offScreenCtx.createRadialGradient(10,20,30, 100,100,70);
+            // The stored values are a % of the canvas, calculate their pixel positions
+            let xPercent = this.width*0.01;
+            let yPercent = this.height*0.01;
+            let x0 = xPercent * canvasValue.x0;
+            let y0 = yPercent * canvasValue.y0;
+            let r0 = yPercent * canvasValue.r0;
+            let x1 = xPercent * canvasValue.x1;
+            let y1 = yPercent * canvasValue.y1;
+            let r1 = yPercent * canvasValue.r1;
+
+            let gradient = offScreenCtx.createRadialGradient(x0,y1,r0,x1,y1,y0);
             // Add color stops
             let i = 0;
             for (let cs of canvasValue.cs) {

@@ -52,8 +52,33 @@ class FingerprintService {
         return sha1(this.randomFloat())
     }
 
+
+
+
+
     generateNewFingerprint () {
-        let colorStops = []
+        // Generate a cirle coordinates as a % of the canvas size
+        // The X and Y position will be within the 25-75 percentile
+        // This ensures the circle will also be visible whist some circles only partially visible
+        // The radius of the circle with also be within 25-75% of the canvas size
+        let outerLowerSize = 25;
+        let outerUpperSize = 75;
+        // For simplicity let's make both circles centred on the same spot
+        let x = this.getRandomInt(outerLowerSize, outerUpperSize);
+        let y = this.getRandomInt(outerLowerSize, outerUpperSize);
+        let r1 = this.getRandomInt(outerLowerSize, outerUpperSize);
+        let r0 = r1*(this.getRandomInt(1, 50)*0.1); // Between 10-50% of the outer circle size
+        let canvasOut = {
+          x0: x,
+          y0: y,
+          r0,
+          x1: x,
+          y1: y,
+          r1,
+          cs: []
+        }
+
+        // Generate some colour stops for the circle gradient
         for (let i = 0; i < this.getRandomInt(2, 5); i++) {
             // 0.001 isn't rendered anything above 0.005 can become visible
             let cs = {
@@ -62,7 +87,7 @@ class FingerprintService {
                 b: this.getRandomInt(0, 255),
                 a: this.getRandomInt(1, 5) * 0.001
             }
-            colorStops.push(cs)
+            canvasOut.cs.push(cs)
         }
 
         let plugins = navigator.plugins
@@ -95,7 +120,7 @@ class FingerprintService {
         // TODO shuffle plugin array
 
         return {
-            canvas: {cs: colorStops},
+            canvas: canvasOut,
             plugins: pluginsOut
         }
     }
