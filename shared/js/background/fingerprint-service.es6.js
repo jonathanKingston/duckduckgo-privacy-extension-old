@@ -38,16 +38,18 @@ class FingerprintService {
         return null
     }
 
+    randomFloat () {
+        return window.crypto.getRandomValues(new Uint32Array(1))[0] / 2**32
+    }
+
     getRandomInt (min, max) {
         min = Math.ceil(min)
         max = Math.floor(max)
-        // TODO use Cryto instead
-        return Math.floor(Math.random() * (max - min + 1)) + min
+        return Math.floor(this.randomFloat() * (max - min + 1)) + min
     }
 
     getRandomHash () {
-        // TODO use Cryto instead
-        return sha1(Math.random())
+        return sha1(this.randomFloat())
     }
 
     generateNewFingerprint () {
