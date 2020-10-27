@@ -211,9 +211,8 @@
 
     function buildCanvasScript () {
         return `
-        (() => {
-          let _toDataURL = HTMLCanvasElement.prototype.toDataURL;
-          function toDataURL() {
+        let _toDataURL = HTMLCanvasElement.prototype.toDataURL;
+        function toDataURL() {
             let ctx = this.getContext('2d');
             let imageData = ctx.getImageData(0, 0, this.width, this.height);
         
@@ -244,63 +243,59 @@
 
             // Call the original method on the modified off-screen canvas
             return _toDataURL.apply(offScreenCanvas, arguments);
-          };
-          toDataURL.toString = () => {
-              return \`${toString('toDataURL')}\`;
-          };
-          Object.defineProperty(HTMLCanvasElement.prototype, 'toDataURL', {
-              value: toDataURL,
-              configurable: true,
-              writeable: false
-          });
-        })();
+        };
+        toDataURL.toString = () => {
+            return \`${toString('toDataURL')}\`;
+        };
+        Object.defineProperty(HTMLCanvasElement.prototype, 'toDataURL', {
+            value: toDataURL,
+            configurable: true,
+            writeable: false
+        });
         `
     }
 
     function buildPluginProperties () {
         // TODO support all the API methods
         return `
-        (() => {
-          class Plugin {
-              constructor(data) {
-                  for (let i in data.mimeTypes) {
-                    this[i] = data.mimeTypes[i];
-                  }
-                  this.length = data.mimeTypes.length;
-                  this.description = data.description;
-                  this.filename = data.filename;
-                  this.name = data.name;
-              }
-
-              [Symbol.iterator]() {
+        class Plugin {
+            constructor(data) {
+                for (let i in data.mimeTypes) {
+                  this[i] = data.mimeTypes[i];
+                }
+                this.length = data.mimeTypes.length;
+                this.description = data.description;
+                this.filename = data.filename;
+                this.name = data.name;
+            }
+            [Symbol.iterator]() {
                 return {
-                  plugin: this,
-                  i: 0,
-                  next() {
-                    if (this.i < this.plugin.length) {
-                      return { value: this.plugin[this.i++], done: false };
+                    plugin: this,
+                    i: 0,
+                    next() {
+                        if (this.i < this.plugin.length) {
+                            return { value: this.plugin[this.i++], done: false };
+                        }
+                        return { value: undefined, done: true };
                     }
-                    return { value: undefined, done: true };
-                  }
                 };
-              }
-          }
-          class PluginArray {
-              constructor() {
-                  this.orig = navigator.plugins;
-                  let data = ${JSON.stringify(ddg_ext_fingerprint.plugins)};
-                  this.length = data.length;
-                  for (let i in data) {
-                      this[i] = new Plugin(data[i]);
-                  }
-              }
-          }
-          Object.defineProperty(navigator, 'plugins', {
-              value: new PluginArray(),
-              configurable: true,
-              writeable: false
-          });
-        })();
+            }
+        }
+        class PluginArray {
+            constructor() {
+                this.orig = navigator.plugins;
+                let data = ${JSON.stringify(ddg_ext_fingerprint.plugins)};
+                this.length = data.length;
+                for (let i in data) {
+                    this[i] = new Plugin(data[i]);
+                }
+            }
+        }
+        Object.defineProperty(navigator, 'plugins', {
+            value: new PluginArray(),
+            configurable: true,
+            writeable: false
+        });
         `
     }
 
@@ -401,7 +396,9 @@
         // Inject into main page
         try {
             let e = document.createElement('script')
-            e.textContent = scriptToInject
+            e.textContent = `(() => {
+              ${scriptToInject}
+            })()`
             elemToInject.appendChild(e)
 
             if (removeAfterExec) {
