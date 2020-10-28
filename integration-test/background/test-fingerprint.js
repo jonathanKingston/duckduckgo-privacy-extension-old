@@ -114,8 +114,6 @@ describe('First Party Fingerprint Randomization', () => {
             })()
         })
 
-        // TODO load an third party iframe and verify that the signatures match the first party
-
         await page.close()
 
         return {
@@ -151,3 +149,4 @@ describe('First Party Fingerprint Randomization', () => {
         expect(plugin.size).toEqual(tests.length)
     })
 })
+

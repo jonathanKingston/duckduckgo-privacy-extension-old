@@ -52,10 +52,6 @@ class FingerprintService {
         return sha1(this.randomFloat())
     }
 
-
-
-
-
     generateNewFingerprint () {
         // Generate a cirle coordinates as a % of the canvas size
         // The X and Y position will be within the 25-75 percentile
