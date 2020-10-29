@@ -265,8 +265,8 @@
     }
 
     function buildPluginProperties () {
-        // TODO support all the API methods
         return `
+        let pluginData = ${JSON.stringify(ddg_ext_fingerprint.plugins)};
         class Plugin {
             constructor(data) {
                 for (let i in data.mimeTypes) {
@@ -276,6 +276,20 @@
                 this.description = data.description;
                 this.filename = data.filename;
                 this.name = data.name;
+            }
+            toString() {
+                return "[object Plugin]"
+            }
+            item(i) {
+              return this[i] || null
+            }
+            namedItem(type) {
+                for (let item of this) {
+                    if (item.type == type) {
+                        return item
+                    }
+                }
+                return null
             }
             [Symbol.iterator]() {
                 return {
@@ -292,16 +306,39 @@
         }
         class PluginArray {
             constructor() {
-                this.orig = navigator.plugins;
-                let data = ${JSON.stringify(ddg_ext_fingerprint.plugins)};
-                this.length = data.length;
-                for (let i in data) {
-                    this[i] = new Plugin(data[i]);
+                this.length = pluginData.length;
+                for (let i in pluginData) {
+                    this[i] = new Plugin(pluginData[i]);
                 }
+            }
+            toString() {
+                return "[object PluginArray]"
             }
         }
         Object.defineProperty(navigator, 'plugins', {
             value: new PluginArray(),
+            configurable: true,
+            writeable: false
+        });
+        class MimeTypeArray {
+            constructor() {
+                let uniqueMimes = new Map();
+                for (let i in pluginData) {
+                    pluginData[i].mimeTypes.forEach(mime => uniqueMimes.set(mime.type, mime))
+                }
+                this.length = uniqueMimes.size;
+                let i = 0;
+                for (let [type, mime] in uniqueMimes) {
+                    this[type] = mime;
+                    this[i++] = mime;
+                }
+            }
+            toString() {
+                return "[object MimeTypeArray]"
+            }
+        }
+        Object.defineProperty(navigator, 'mimeTypes', {
+            value: new MimeTypeArray(),
             configurable: true,
             writeable: false
         });
