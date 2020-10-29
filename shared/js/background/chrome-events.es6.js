@@ -341,7 +341,7 @@ chrome.alarms.onAlarm.addListener(alarmEvent => {
             .then(lists => trackers.setLists(lists))
             .catch(e => console.log(e))
     } else if (alarmEvent.name === 'clearExpiredFingerprintServiceCache') {
-        httpsService.clearExpiredCache()
+        fingerprintService.clearExpiredCache()
     } else if (alarmEvent.name === 'clearExpiredHTTPSServiceCache') {
         httpsService.clearExpiredCache()
     } else if (alarmEvent.name === 'updateUserAgentData') {

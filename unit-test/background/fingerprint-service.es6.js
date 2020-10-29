@@ -16,4 +16,12 @@ describe('Fingerprint service', () => {
         let fp2 = fingerprintService.getFingerprint('example.com')
         expect(fp.canvas).toEqual(fp2.canvas)
     })
+
+    it('Fingerprint storage should expire', () => {
+        const ONE_HOUR_MS = 60 * 60 * 1000
+        const fp = fingerprintService.getFingerprint('clearme.com')
+        fingerprintService.clearExpiredCache(Date.now() + ONE_HOUR_MS + 1)
+        const fp2 = fingerprintService.getFingerprint('clearme.com')
+        expect(fp.canvas).not.toEqual(fp2.canvas)
+    })
 })

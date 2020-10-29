@@ -129,11 +129,11 @@ class FingerprintService {
         this._cache.clear()
     }
 
-    clearExpiredCache () {
-        const now = Date.now()
+    clearExpiredCache (expiryTime) {
+        expiryTime = expiryTime || Date.now()
 
         Array.from(this._cache.keys())
-            .filter(key => this._cache.get(key).expires < now)
+            .filter(key => this._cache.get(key).expires < expiryTime)
             .forEach(key => this._cache.delete(key))
     }
 }
