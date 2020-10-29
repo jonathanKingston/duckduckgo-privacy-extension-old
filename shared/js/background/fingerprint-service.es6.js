@@ -3,8 +3,6 @@ const sha1 = require('../shared-utils/sha1')
 const punycode = require('punycode')
 const ONE_HOUR_MS = 60 * 60 * 1000
 
-const fingerprintStorage = require('./storage/fingerprints.es6')
-
 class FingerprintService {
     constructor () {
         this._cache = new Map()
@@ -127,19 +125,13 @@ class FingerprintService {
      * @param {string} host
      * @returns {Object}
      */
-    async getFingerprint (host) {
+    getFingerprint (host) {
         const cache = this.checkInCache(host)
         if (cache) {
             return cache
         }
 
-        const res = await fingerprintStorage.get(host);
-        if (res) {
-            this._cacheResult(host, res)
-            return res;
-        }
         const data = this.generateNewFingerprint()
-        fingerprintStorage.store(host, data);
         this._cacheResult(host, data)
 
         return data

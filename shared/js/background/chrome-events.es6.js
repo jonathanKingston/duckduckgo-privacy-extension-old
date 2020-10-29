@@ -210,7 +210,7 @@ const fingerprintService = require('./fingerprint-service.es6')
 
 // Inject fingerprint protection into sites when
 // they are not whitelisted.
-chrome.webNavigation.onCommitted.addListener(async details => {
+chrome.webNavigation.onCommitted.addListener(details => {
     const whitelisted = settings.getSetting('whitelisted')
     const tabURL = new URL(details.url) || {}
     let tab = tabManager.get({ tabId: details.tabId })
@@ -220,7 +220,7 @@ chrome.webNavigation.onCommitted.addListener(async details => {
         return
     }
     if (!whitelisted || !whitelisted[tabURL.hostname]) {
-        let fingerprintData = await fingerprintService.getFingerprint(tabURL.hostname);
+        let fingerprintData = fingerprintService.getFingerprint(tabURL.hostname);
         // Set variables, which are used in the fingerprint-protection script.
         try {
             const variableScript = {
