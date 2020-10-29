@@ -44,21 +44,21 @@ class FingerprintService {
         // The X and Y position will be within the 25-75 percentile
         // This ensures the circle will also be visible whist some circles only partially visible
         // The radius of the circle with also be within 25-75% of the canvas size
-        let outerLowerSize = 25;
-        let outerUpperSize = 75;
+        let outerLowerSize = 25
+        let outerUpperSize = 75
         // For simplicity let's make both circles centred on the same spot
-        let x = random.getInt(outerLowerSize, outerUpperSize);
-        let y = random.getInt(outerLowerSize, outerUpperSize);
-        let r1 = random.getInt(outerLowerSize, outerUpperSize);
-        let r0 = r1*(random.getInt(1, 50)*0.1); // Between 10-50% of the outer circle size
+        let x = random.getInt(outerLowerSize, outerUpperSize)
+        let y = random.getInt(outerLowerSize, outerUpperSize)
+        let r1 = random.getInt(outerLowerSize, outerUpperSize)
+        let r0 = r1 * (random.getInt(1, 50) * 0.1) // Between 10-50% of the outer circle size
         let canvasOut = {
-          x0: x,
-          y0: y,
-          r0,
-          x1: x,
-          y1: y,
-          r1,
-          cs: []
+            x0: x,
+            y0: y,
+            r0,
+            x1: x,
+            y1: y,
+            r1,
+            cs: []
         }
 
         // Generate some colour stops for the circle gradient
@@ -101,7 +101,7 @@ class FingerprintService {
             pluginsOut.push(obj)
         }
 
-        random.shuffleArray(pluginsOut);
+        random.shuffleArray(pluginsOut)
 
         return {
             canvas: canvasOut,

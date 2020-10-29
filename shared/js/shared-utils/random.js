@@ -6,7 +6,7 @@ module.exports = {
      * @returns {float}
      */
     getFloat () {
-        return window.crypto.getRandomValues(new Uint32Array(1))[0] / 2**32
+        return window.crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32
     },
 
     /**
@@ -36,7 +36,7 @@ module.exports = {
     shuffleArray (array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(this.getFloat() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+            [array[i], array[j]] = [array[j], array[i]]
         }
-    },
+    }
 }

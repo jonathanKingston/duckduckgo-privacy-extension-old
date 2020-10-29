@@ -149,4 +149,3 @@ describe('First Party Fingerprint Randomization', () => {
         expect(plugin.size).toEqual(tests.length)
     })
 })
-

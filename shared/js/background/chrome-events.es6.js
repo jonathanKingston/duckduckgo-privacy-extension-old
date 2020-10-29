@@ -220,7 +220,7 @@ chrome.webNavigation.onCommitted.addListener(details => {
         return
     }
     if (!whitelisted || !whitelisted[tabURL.hostname]) {
-        let fingerprintData = fingerprintService.getFingerprint(tabURL.hostname);
+        let fingerprintData = fingerprintService.getFingerprint(tabURL.hostname)
         // Set variables, which are used in the fingerprint-protection script.
         try {
             const variableScript = {
