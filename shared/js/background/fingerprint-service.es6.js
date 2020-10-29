@@ -1,4 +1,5 @@
 const sha1 = require('../shared-utils/sha1')
+const random = require('../shared-utils/random')
 // eslint-disable-next-line node/no-deprecated-api
 const punycode = require('punycode')
 const ONE_HOUR_MS = 60 * 60 * 1000
@@ -38,20 +39,6 @@ class FingerprintService {
         return null
     }
 
-    randomFloat () {
-        return window.crypto.getRandomValues(new Uint32Array(1))[0] / 2**32
-    }
-
-    getRandomInt (min, max) {
-        min = Math.ceil(min)
-        max = Math.floor(max)
-        return Math.floor(this.randomFloat() * (max - min + 1)) + min
-    }
-
-    getRandomHash () {
-        return sha1(this.randomFloat())
-    }
-
     generateNewFingerprint () {
         // Generate a cirle coordinates as a % of the canvas size
         // The X and Y position will be within the 25-75 percentile
@@ -60,10 +47,10 @@ class FingerprintService {
         let outerLowerSize = 25;
         let outerUpperSize = 75;
         // For simplicity let's make both circles centred on the same spot
-        let x = this.getRandomInt(outerLowerSize, outerUpperSize);
-        let y = this.getRandomInt(outerLowerSize, outerUpperSize);
-        let r1 = this.getRandomInt(outerLowerSize, outerUpperSize);
-        let r0 = r1*(this.getRandomInt(1, 50)*0.1); // Between 10-50% of the outer circle size
+        let x = random.getInt(outerLowerSize, outerUpperSize);
+        let y = random.getInt(outerLowerSize, outerUpperSize);
+        let r1 = random.getInt(outerLowerSize, outerUpperSize);
+        let r0 = r1*(random.getInt(1, 50)*0.1); // Between 10-50% of the outer circle size
         let canvasOut = {
           x0: x,
           y0: y,
@@ -75,13 +62,13 @@ class FingerprintService {
         }
 
         // Generate some colour stops for the circle gradient
-        for (let i = 0; i < this.getRandomInt(2, 5); i++) {
+        for (let i = 0; i < random.getInt(2, 5); i++) {
             // 0.001 isn't rendered anything above 0.005 can become visible
             let cs = {
-                r: this.getRandomInt(0, 255),
-                g: this.getRandomInt(0, 255),
-                b: this.getRandomInt(0, 255),
-                a: this.getRandomInt(1, 5) * 0.001
+                r: random.getInt(0, 255),
+                g: random.getInt(0, 255),
+                b: random.getInt(0, 255),
+                a: random.getInt(1, 5) * 0.001
             }
             canvasOut.cs.push(cs)
         }
@@ -93,7 +80,7 @@ class FingerprintService {
             for (let mimeType of plugin) {
                 mimeTypes.push({
                     type: mimeType.type,
-                    description: this.getRandomHash(),
+                    description: random.getHash(),
                     suffixes: mimeType.suffixes
                 })
             }
@@ -101,19 +88,20 @@ class FingerprintService {
             let description = plugin.description
             // Support for PDF is still needed
             if (!name.match('PDF')) {
-                name = this.getRandomHash().substr(0, this.getRandomInt(5, 10))
-                description = this.getRandomHash()
+                name = random.getHash().substr(0, random.getInt(5, 10))
+                description = random.getHash()
             }
             let obj = {
                 name,
-                filename: this.getRandomHash(),
+                filename: random.getHash(),
                 version: plugin.version,
                 description,
                 mimeTypes
             }
             pluginsOut.push(obj)
         }
-        // TODO shuffle plugin array
+
+        random.shuffleArray(pluginsOut);
 
         return {
             canvas: canvasOut,

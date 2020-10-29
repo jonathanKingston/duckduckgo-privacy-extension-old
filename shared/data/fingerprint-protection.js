@@ -247,9 +247,6 @@
             offScreenCtx.fillStyle = gradient;
             offScreenCtx.fillRect(0, 0, this.height, this.width);
 
-            // TODO Now these values have been used, store them
-            // TODO there may be a race condition of an attacker loading multiple iframes...
-
             // Call the original method on the modified off-screen canvas
             return _toDataURL.apply(offScreenCanvas, arguments);
         };
