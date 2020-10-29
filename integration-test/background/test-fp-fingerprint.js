@@ -1,5 +1,5 @@
 /**
- *  Tests for fingerprint defenses. Ensure that fingerprinting is actually being blocked.
+ *  Tests for fingerprinting, these tests load a example website server.
  */
 
 /* global dbg:false */

@@ -92,11 +92,11 @@
             }
         },
         'useragent': {
-            //            'userAgent': {
-            //                'object': 'navigator',
-            //                'origValue': navigator.userAgent,
-            //                'targetValue': `"${ddg_ext_ua}"` // Defined in chrome-events.es6.js and injected as a variable
-            //            },
+//            'userAgent': {
+//                'object': 'navigator',
+//                'origValue': navigator.userAgent,
+//                'targetValue': `"${ddg_ext_ua}"` // Defined in chrome-events.es6.js and injected as a variable
+//            },
             'appVersion': {
                 'object': 'navigator',
                 'origValue': navigator.appVersion,
@@ -209,6 +209,14 @@
         }
     }
 
+    /**
+     * Build a script that overloads the Canvas API to add gradients that are different per first party.
+     * Taking the randomized values from `ddg_ext_fingerprint.canvas` the script:
+     * - Takes the original canvas value and places it into an off screen canvas.
+     * - Adds a radial gradient at a random position.
+     * - Creates a random amount of colour stops with colours that are almost impossible to see.
+     * - Returns the value out of the original `toDataURL` call.
+     */
     function buildCanvasScript () {
         return `
         let _toDataURL = HTMLCanvasElement.prototype.toDataURL;
@@ -261,6 +269,11 @@
         `
     }
 
+    /**
+     * Build a script that shims the native Plugin APIs
+     * Using the `ddg_ext_fingerprint.plugins` randomized plugin data to export to the page.
+     * This code should behave as closely to the browser API but using the modified data to reduce the fingerprinting.
+     **/
     function buildPluginProperties () {
         return `
         let pluginData = ${JSON.stringify(ddg_ext_fingerprint.plugins)};

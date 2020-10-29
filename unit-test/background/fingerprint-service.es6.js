@@ -6,22 +6,22 @@ describe('Fingerprint service', () => {
     })
 
     it('Each hostname should get a unique fingerprint', () => {
-        let fp = fingerprintService.getFingerprint('example.com')
-        let fp2 = fingerprintService.getFingerprint('example2.com')
+        let fp = fingerprintService.getFingerprintData('example.com')
+        let fp2 = fingerprintService.getFingerprintData('example2.com')
         expect(fp.canvas).not.toEqual(fp2.canvas)
     })
 
     it('A hostname should provide a consistent result', () => {
-        let fp = fingerprintService.getFingerprint('example.com')
-        let fp2 = fingerprintService.getFingerprint('example.com')
+        let fp = fingerprintService.getFingerprintData('example.com')
+        let fp2 = fingerprintService.getFingerprintData('example.com')
         expect(fp.canvas).toEqual(fp2.canvas)
     })
 
     it('Fingerprint storage should expire', () => {
         const ONE_HOUR_MS = 60 * 60 * 1000
-        const fp = fingerprintService.getFingerprint('clearme.com')
+        const fp = fingerprintService.getFingerprintData('clearme.com')
         fingerprintService.clearExpiredCache(Date.now() + ONE_HOUR_MS + 1)
-        const fp2 = fingerprintService.getFingerprint('clearme.com')
+        const fp2 = fingerprintService.getFingerprintData('clearme.com')
         expect(fp.canvas).not.toEqual(fp2.canvas)
     })
 })

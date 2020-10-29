@@ -39,7 +39,11 @@ class FingerprintService {
         return null
     }
 
-    generateNewFingerprint () {
+    /**
+     * Generates random fingerprint seed data.
+     * @returns {Object|null}
+     */
+    generateNewFingerprintData () {
         // Generate a cirle coordinates as a % of the canvas size
         // The X and Y position will be within the 25-75 percentile
         // This ensures the circle will also be visible whist some circles only partially visible
@@ -113,13 +117,13 @@ class FingerprintService {
      * @param {string} host
      * @returns {Object}
      */
-    getFingerprint (host) {
+    getFingerprintData (host) {
         const cache = this.checkInCache(host)
         if (cache) {
             return cache
         }
 
-        const data = this.generateNewFingerprint()
+        const data = this.generateNewFingerprintData()
         this._cacheResult(host, data)
 
         return data
