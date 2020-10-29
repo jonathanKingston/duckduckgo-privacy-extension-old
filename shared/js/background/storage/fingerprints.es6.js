@@ -13,21 +13,30 @@ class FingerprintStorage {
     constructor () {
         this.fingerprintDB = new Dexie('fingerprintStorage')
         this.fingerprintDB.version(1).stores({
-            fingerprintStorage: 'host, data'
+            fingerprintStorage: 'host, data, used, date'
         })
     }
 
-    get (host) {
-        return this.fingerprintDB.open()
-            .then(() => this.fingerprintDB.table('fingerprintStorage').get({ host }))
+    async get (host) {
+        await this.fingerprintDB.open();
+        return this.fingerprintDB.table('fingerprintStorage').get({ host })
     }
 
     async store (host, data) {
         try {
-            await this.fingerprintDB.fingerprintStorage.put({host, data})
+            await this.fingerprintDB.fingerprintStorage.put({host, data, date: Date.now(), used: false})
         } catch (e) {
             console.log(`Error storing agent data locally: ${e}`)
         }
+    }
+
+    async clearUnused() {
+        const now = Date.now();
+        const expiryTime = now - (60*1000); // 1 hour
+        await this.fingerprintDB.open();
+        return this.fingerprintDB.table('fingerprintStorage').filter(fp => {
+            return !fp.used && fp.date < expiryTime;
+        }).delete()
     }
 }
 module.exports = new FingerprintStorage()

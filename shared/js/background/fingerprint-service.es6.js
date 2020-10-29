@@ -135,6 +135,7 @@ class FingerprintService {
 
         const res = await fingerprintStorage.get(host);
         if (res) {
+            this._cacheResult(host, res)
             return res;
         }
         const data = this.generateNewFingerprint()
